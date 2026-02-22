@@ -1,0 +1,8 @@
+config.min=-5000
+config.max=5000
+config.width=3
+config.align=left
+config.stretch=0
+=
+3300;4400;20;SUM(A:C)
+-40;-50;-60

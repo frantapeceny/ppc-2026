@@ -1,0 +1,6 @@
+config.min=0
+config.max=1000
+config.width=2
+=
+100;200;300;400;500;SUM(A:E)
+60;20;30;40;50;60;70

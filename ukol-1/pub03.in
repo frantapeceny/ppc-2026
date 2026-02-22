@@ -1,0 +1,5 @@
+config.min=0
+config.max=10
+=
+10;20;30;SUM(A:C)
+60;20;70
