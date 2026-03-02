@@ -4,21 +4,22 @@
 #include <vector>
 #include <sstream>
 
+using namespace std;
+
 struct konfigurace{
-    std::string funkce;
-    std::string hodnota;
+    string funkce;
+    string hodnota;
 };
 
 void loadConfig(){
+    string funkce, formalita, hodnota;
+    vector <konfigurace> poleKonfiguraci;
 
-    std::string funkce, formalita, hodnota;
-    std::vector <konfigurace> poleKonfiguraci;
+    while (cin.peek() != '='){
 
-    while (std::cin.peek() != '='){
-
-        getline(std::cin, formalita,'.');
-        getline(std::cin, funkce, '=');
-        getline(std::cin, hodnota);
+        getline(cin, formalita,'.');
+        getline(cin, funkce, '=');
+        getline(cin, hodnota);
 
         konfigurace currentConfig;
         
@@ -29,49 +30,66 @@ void loadConfig(){
 
         //cout << formalita << "\n" << funkce << "\n" << hodnota << endl;
     }
-    std::cin.ignore(); // preskocim "="
-    std::cin.ignore(); // preskocim newline
+    cin.ignore(); // preskocim "="
+    cin.ignore(); // preskocim newline
 
     for (int i = 0; i < poleKonfiguraci.size(); i++){
-        std::cout << poleKonfiguraci[i].funkce << " " << poleKonfiguraci[i].hodnota << std::endl;
+        cout << poleKonfiguraci[i].funkce << " " << poleKonfiguraci[i].hodnota << endl;
     }
 
-    std::cout << "checkpoint - zpracovany config" << std::endl;
+    cout << "checkpoint - zpracovany config" << endl;
     
     //cout << "pocet ulozenych configu: " << poleKonfiguraci.size() << endl;
 }
 
 void loadNums(){
-    std::string cislo, radek;
-    std::vector <std::string> poleCisel;
-    int poziceDvojtecky;
-    int prvniPoziceProSum, druhaPoziceProSum;
+    string cislo, radek;
+    vector <string> poleCisel;
+    vector <int> pocetCisel;
+    int maxPocetCiselNaRadku = 0;
+    int pocetCiselNaRadku = 0;
 
-    getline(std::cin, radek);   
-    std::stringstream radekSS(radek);
+    while (cin.peek() != EOF){
+        getline(cin, radek, '\n');   
+        stringstream radekSS(radek);
 
-    std::cout << "loaded radek: " << radekSS.str() << std::endl;
+        cout << "loaded radek: " << radekSS.str() << endl;
 
-    while(radekSS.peek() != EOF){
-        getline(radekSS, cislo, ';');
+        while(radekSS.peek() != EOF){
+            getline(radekSS, cislo, ';');
 
-        poleCisel.push_back(cislo);
-
-        /*
-        if (poziceDvojtecky = cislo.find(':')){ //nemusi fungovat
-            prvniPoziceProSum = cislo[poziceDvojtecky-1] - 'A' + 1; // nebo -65
-            druhaPoziceProSum = cislo[poziceDvojtecky+1] - 'A' + 1;
-            //druhaPoziceProSum - prvniPoziceProSum;
-            std::cout << prvniPoziceProSum << " " << druhaPoziceProSum << std::endl;
-
-        } else {
             poleCisel.push_back(cislo);
-        }*/
-    }
-    std::cout << "extraktovana cisla: " << std::endl;
+            pocetCiselNaRadku ++;
 
-    for (int i = 0; i < poleCisel.size(); i++){
-        std::cout << poleCisel[i] << std::endl;
+            /*
+            if (poziceDvojtecky = cislo.find(':')){ //nemusi fungovat
+                prvniPoziceProSum = cislo[poziceDvojtecky-1] - 'A' + 1; // nebo -65
+                druhaPoziceProSum = cislo[poziceDvojtecky+1] - 'A' + 1;
+                //druhaPoziceProSum - prvniPoziceProSum;
+                cout << prvniPoziceProSum << " " << druhaPoziceProSum << endl;
+
+            } else {
+                poleCisel.push_back(cislo);
+            }*/
+        }
+
+        pocetCisel.push_back(pocetCiselNaRadku);
+
+        if (pocetCiselNaRadku > maxPocetCiselNaRadku){
+            maxPocetCiselNaRadku = pocetCiselNaRadku;
+        }
+    }
+
+    cout << "extraktovana cisla: " << endl;
+    cout<< "pocetcisel.size: " << pocetCisel.size() << endl;
+
+    int pocetRadku = pocetCisel.size();
+
+    for (int h = 0; h < pocetRadku; h++){
+        cout <<"radek cislo " << h << ": " << endl;
+        for (int i = 0; i < pocetCisel.at(h); i++){
+            cout << poleCisel[i] << endl;
+        }        
     }
 }
 
