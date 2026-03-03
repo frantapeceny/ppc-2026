@@ -19,9 +19,20 @@ struct parametry{
     int maxDelka;
 };
 
-void printTable(){
+void printTable(vector <konfigurace> poleKonfiguraci, parametry infoProTabulku){
+    int sirka;
+    string zarovnani;
+    for (int i = 0; i < poleKonfiguraci.size(); i ++){
+        if (poleKonfiguraci[i].funkce == "width"){
+            sirka = stoi(poleKonfiguraci[i].hodnota);
+        }
+        if (poleKonfiguraci[i].funkce == "align"){
+            zarovnani = poleKonfiguraci[i].hodnota;
+        }
+    }
 
-
+    cout << "width: " << sirka << endl;
+    cout << "align: " << zarovnani << endl;
 }
 
 void printConfig(vector <konfigurace> poleKonfiguraci){
@@ -175,7 +186,7 @@ int main(){
 
     parametry infoProTabulku = loadNums();
 
-    printTable();
+    printTable(poleKonfiguraci, infoProTabulku);
 
     return 0;
 }    
