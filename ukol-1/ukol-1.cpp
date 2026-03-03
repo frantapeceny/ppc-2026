@@ -12,6 +12,18 @@ struct konfigurace{
     string hodnota;
 };
 
+struct parametry{
+    vector <int> poleCisel;
+    vector <int> pocetCisel;
+    int pocetRadku;
+    int maxDelka;
+};
+
+void printTable(){
+
+
+}
+
 void printConfig(vector <konfigurace> poleKonfiguraci){
     vector <string> poradiTisku = {"min", "max", "width", "align", "stretch", "header"};
     
@@ -71,7 +83,7 @@ void doplnChybejiciConfig(vector <konfigurace>* poleKonfiguraci){
     }
 }
 
-void loadConfig(){
+vector <konfigurace> loadConfig(){
     string funkce, formalita, hodnota;
     vector <konfigurace> poleKonfiguraci;
 
@@ -95,9 +107,11 @@ void loadConfig(){
     doplnChybejiciConfig(&poleKonfiguraci);
 
     printConfig(poleKonfiguraci);
+
+    return poleKonfiguraci;
 }
 
-void loadNums(){
+parametry loadNums(){
     string cislo, radek;
     vector <int> poleCisel;
     vector <int> pocetCisel;
@@ -143,15 +157,25 @@ void loadNums(){
 
     int pocetRadku = pocetCisel.size();   
 
+    parametry returnValues;
+
+    returnValues.poleCisel = poleCisel;
+    returnValues.pocetCisel = pocetCisel;
+    returnValues.pocetRadku = pocetRadku;
+    returnValues.maxDelka = maxDelka;
+
+    return returnValues;
+
     // cisla jsou ulozena v poli poleCisel, delky radku jsou v poli pocetCisel, pocet radku je v hodnota promenne pocetRadku, maximalni delka radku je v promenne maxDelka
 }
 
 int main(){
     
-    loadConfig();
+    vector <konfigurace> poleKonfiguraci = loadConfig();
 
-    loadNums();
+    parametry infoProTabulku = loadNums();
 
+    printTable();
 
     return 0;
 }    
