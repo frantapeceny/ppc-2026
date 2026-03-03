@@ -3,6 +3,7 @@
 #include <string>
 #include <vector>
 #include <sstream>
+#include <algorithm>
 
 using namespace std;
 
@@ -10,6 +11,65 @@ struct konfigurace{
     string funkce;
     string hodnota;
 };
+
+void printConfig(vector <konfigurace> poleKonfiguraci){
+    vector <string> poradiTisku = {"min", "max", "width", "align", "stretch", "header"};
+    
+    for (auto target : poradiTisku){
+        for (int i = 0; i < poleKonfiguraci.size(); i++) {
+            if (poleKonfiguraci[i].funkce == target) {
+                cout << "config." << poleKonfiguraci[i].funkce << "=" << poleKonfiguraci[i].hodnota << endl;
+                break;
+            }
+        }
+    }
+    cout << endl;
+}
+
+void doplnChybejiciConfig(vector <konfigurace>* poleKonfiguraci){
+    
+    vector <string> mam;
+    for (int i = 0; i < (*poleKonfiguraci).size(); i ++){
+        mam.push_back((*poleKonfiguraci)[i].funkce);
+    }
+
+    vector <string> chci = {"min", "max", "width", "align"};
+
+    vector <string> found;
+    vector <string> missing;
+
+    for (const string& target : chci) {
+        if (find(mam.begin(), mam.end(), target) != mam.end()){
+            found.push_back(target);
+        } else {
+            missing.push_back(target);
+            if (target == "max"){
+                konfigurace currentConfig;
+                currentConfig.funkce = target;
+                currentConfig.hodnota = "100";
+                (*poleKonfiguraci).push_back(currentConfig);
+            }
+            if (target == "min"){
+                konfigurace currentConfig;
+                currentConfig.funkce = target;
+                currentConfig.hodnota = "-99";
+                (*poleKonfiguraci).push_back(currentConfig);
+            }
+            if (target == "width"){
+                konfigurace currentConfig;
+                currentConfig.funkce = target;
+                currentConfig.hodnota = "3";
+                (*poleKonfiguraci).push_back(currentConfig);
+            }
+            if (target == "align"){
+                konfigurace currentConfig;
+                currentConfig.funkce = target;
+                currentConfig.hodnota = "left";
+                (*poleKonfiguraci).push_back(currentConfig);
+            }
+        }
+    }
+}
 
 void loadConfig(){
     string funkce, formalita, hodnota;
@@ -28,23 +88,13 @@ void loadConfig(){
 
         poleKonfiguraci.push_back(currentConfig);
 
-        //cout << formalita << "\n" << funkce << "\n" << hodnota << endl;
     }
     cin.ignore(); // preskocim "="
     cin.ignore(); // preskocim newline
 
-    if (poleKonfiguraci.size() == 4){
-        for (int i = 0; i < poleKonfiguraci.size(); i++){
-        cout << poleKonfiguraci[i].funkce << " " << poleKonfiguraci[i].hodnota << endl;
-    }
-    }
+    doplnChybejiciConfig(&poleKonfiguraci);
 
-    for (int i = 0; i < poleKonfiguraci.size(); i++){
-        if poleKonfiguraci[i]
-    }
-    
-    
-
+    printConfig(poleKonfiguraci);
 }
 
 void loadNums(){
@@ -59,7 +109,7 @@ void loadNums(){
         getline(cin, radek, '\n');   
         stringstream radekSS(radek);
 
-        cout << "loaded radek: " << radekSS.str() << endl;
+        //cout << "loaded radek: " << radekSS.str() << endl;
 
         while(radekSS.peek() != EOF){
             getline(radekSS, cislo, ';');
@@ -91,25 +141,16 @@ void loadNums(){
         pocetCiselNaRadku = 0;
     }
 
-    int pocetRadku = pocetCisel.size();
-
-    cout << "pocet cisel na radek: ";
-
-    for (int h = 0; h < pocetRadku; h++){
-        cout << pocetCisel[h] << ", ";
-    }
-
-    cout << "max pocet cisel na radek: " << maxDelka << endl;    
+    int pocetRadku = pocetCisel.size();   
 
     // cisla jsou ulozena v poli poleCisel, delky radku jsou v poli pocetCisel, pocet radku je v hodnota promenne pocetRadku, maximalni delka radku je v promenne maxDelka
 }
 
-
-
 int main(){
+    
     loadConfig();
-    loadNums();
 
+    loadNums();
 
 
     return 0;
