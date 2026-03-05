@@ -4,6 +4,7 @@
 #include <vector>
 #include <sstream>
 #include <algorithm>
+#include <iomanip>
 
 using namespace std;
 
@@ -19,7 +20,82 @@ struct parametry{
     int maxDelka;
 };
 
-void printTable(vector <konfigurace> poleKonfiguraci, parametry infoProTabulku){
+void deliciRada(int sirka, int pocetSloupcu){
+    for (int i = 0; i <= pocetSloupcu; i++){
+        cout << "+";
+        for (int h = 0; h < (sirka+2); h++){
+            cout << "-";
+        }
+    }
+    cout << "+" << endl;
+}
+
+void prvniRadek(int sirka, int pocetSloupcu, string zarovnani){
+    for (int i = 0; i <= pocetSloupcu; i++){
+        cout << "| ";
+        if (zarovnani == "left"){
+            if (i == 0){
+                cout << left << setw(sirka+1);
+            } else {
+                cout << left << setw(sirka) << char(64 + i);
+            }
+        } else {
+            if (i == 0){
+                cout << right << setw(sirka+1);
+            } else {
+                cout << right << setw(sirka) << char(64 + i);
+            }
+        }
+        cout << " ";   
+    }
+    cout << "|" << endl;
+}
+
+void printTable(int sirka, int pocetSloupcu, string zarovnani, vector <int> pocetCisel, vector <int> poleCisel){
+
+    // z = kolikaty je to radek, i = kolikaty sloupec
+    deliciRada (sirka, pocetSloupcu);
+    prvniRadek(sirka, pocetSloupcu, zarovnani);
+    int pocetRadku = pocetCisel.size();
+
+    for (int z = 0; z < pocetRadku; z++){
+        deliciRada (sirka, pocetSloupcu);
+        int idx = 0;
+
+        //?
+        int rowOffset = 0;
+        for (int r = 0; r < z; r++) rowOffset += pocetCisel[r];
+
+        for (int i = 0; i <= pocetSloupcu; i++){
+            cout << "| ";
+            if (zarovnani == "left"){
+                if (i == 0){
+                    cout << left << setw(sirka) << z+1;
+                } else if (i <= pocetCisel[z] && i > 0){
+                    cout << left << setw(sirka) << poleCisel[rowOffset + (i - 1)];
+                    idx ++;
+                } else {
+                    cout << left << setw(sirka+1);
+                }
+            } else {
+                if (i == 0){
+                    cout << right << setw(sirka) << z+1;
+                } else if (i <= pocetCisel[z] && i > 0){
+                    cout << right << setw(sirka) << poleCisel[rowOffset + (i - 1)];
+                    idx ++;
+                } else {
+                    cout << right << setw(sirka+1);
+                }
+            }
+            cout << " ";
+        }
+        cout << "|" << endl;
+        
+    }
+    deliciRada (sirka, pocetSloupcu);
+}
+
+void printOutput(vector <konfigurace> poleKonfiguraci, parametry infoProTabulku){
     int sirka;
     string zarovnani;
     for (int i = 0; i < poleKonfiguraci.size(); i ++){
@@ -30,9 +106,9 @@ void printTable(vector <konfigurace> poleKonfiguraci, parametry infoProTabulku){
             zarovnani = poleKonfiguraci[i].hodnota;
         }
     }
+    int pocetSloupcu = infoProTabulku.maxDelka;
 
-    cout << "width: " << sirka << endl;
-    cout << "align: " << zarovnani << endl;
+    printTable(sirka, pocetSloupcu, zarovnani, infoProTabulku.pocetCisel, infoProTabulku.poleCisel);
 }
 
 void printConfig(vector <konfigurace> poleKonfiguraci){
@@ -186,12 +262,9 @@ int main(){
 
     parametry infoProTabulku = loadNums();
 
-    printTable(poleKonfiguraci, infoProTabulku);
+    printOutput(poleKonfiguraci, infoProTabulku);
 
     return 0;
 }    
-
-// line.find(), line.substr(), line.erase(), line.replace(), line.insert(), line.append(), line.compare(), line.find_first_of(), line.find_last_of(), line.find_first_not_of(), line.find_last_not_of()
-
 
 // zeptat na this - co ze to nahrazuje
