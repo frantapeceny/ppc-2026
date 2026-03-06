@@ -5,6 +5,7 @@
 #include <sstream>
 #include <algorithm>
 #include <iomanip>
+#include <stdexcept>
 
 using namespace std;
 
@@ -19,6 +20,11 @@ struct parametry{
     int pocetRadku;
     int maxDelka;
 };
+
+void checkErrors(){
+    
+
+}
 
 void deliciRada(int sirka, int pocetSloupcu){
     for (int i = 0; i <= pocetSloupcu; i++){
@@ -95,22 +101,6 @@ void printTable(int sirka, int pocetSloupcu, string zarovnani, vector <int> poce
     deliciRada (sirka, pocetSloupcu);
 }
 
-void printOutput(vector <konfigurace> poleKonfiguraci, parametry infoProTabulku){
-    int sirka;
-    string zarovnani;
-    for (int i = 0; i < poleKonfiguraci.size(); i ++){
-        if (poleKonfiguraci[i].funkce == "width"){
-            sirka = stoi(poleKonfiguraci[i].hodnota);
-        }
-        if (poleKonfiguraci[i].funkce == "align"){
-            zarovnani = poleKonfiguraci[i].hodnota;
-        }
-    }
-    int pocetSloupcu = infoProTabulku.maxDelka;
-
-    printTable(sirka, pocetSloupcu, zarovnani, infoProTabulku.pocetCisel, infoProTabulku.poleCisel);
-}
-
 void printConfig(vector <konfigurace> poleKonfiguraci){
     vector <string> poradiTisku = {"min", "max", "width", "align", "stretch", "header"};
     
@@ -123,6 +113,25 @@ void printConfig(vector <konfigurace> poleKonfiguraci){
         }
     }
     cout << endl;
+}
+
+void printOutput(vector <konfigurace> poleKonfiguraci, parametry infoProTabulku){
+    int sirka;
+    string zarovnani;
+
+    printConfig(poleKonfiguraci);
+
+    for (int i = 0; i < poleKonfiguraci.size(); i ++){
+        if (poleKonfiguraci[i].funkce == "width"){
+            sirka = stoi(poleKonfiguraci[i].hodnota);
+        }
+        if (poleKonfiguraci[i].funkce == "align"){
+            zarovnani = poleKonfiguraci[i].hodnota;
+        }
+    }
+    int pocetSloupcu = infoProTabulku.maxDelka;
+
+    printTable(sirka, pocetSloupcu, zarovnani, infoProTabulku.pocetCisel, infoProTabulku.poleCisel);
 }
 
 void doplnChybejiciConfig(vector <konfigurace>* poleKonfiguraci){
@@ -193,12 +202,10 @@ vector <konfigurace> loadConfig(){
 
     doplnChybejiciConfig(&poleKonfiguraci);
 
-    printConfig(poleKonfiguraci);
-
     return poleKonfiguraci;
 }
 
-parametry loadNums(){
+parametry loadNums(vector <konfigurace> poleKonfiguraci){
     string cislo, radek;
     vector <int> poleCisel;
     vector <int> pocetCisel;
@@ -210,12 +217,16 @@ parametry loadNums(){
         getline(cin, radek, '\n');   
         stringstream radekSS(radek);
 
-        //cout << "loaded radek: " << radekSS.str() << endl;
-
         while(radekSS.peek() != EOF){
             getline(radekSS, cislo, ';');
 
-            if (cislo.at(0) == 'S'){
+            if (cislo.compare(0, 4, "SUM(", 0, 4) == 0 && cislo.at(7) == ')'){
+                //error check
+                if (cislo.at(6) >= char(pocetCiselNaRadku + 'A')){
+                    cerr << "Invalid input" << endl;
+                    exit (101);
+                }
+                
                 char zacatekIntervalu = cislo.at(4);
                 char konecIntervalu = cislo.at(6);
 
@@ -228,9 +239,20 @@ parametry loadNums(){
                 }
                 poleCisel.push_back(sum);
             } else {
-                poleCisel.push_back(stoi(cislo));
+                // check error
+                try {
+                    int cisloI = stoi(cislo);
+                    // check error
+                    if (cisloI < stoi(poleKonfiguraci[0].hodnota) || cisloI > stoi(poleKonfiguraci[1].hodnota)){
+                        cerr << "Out of range" << endl;
+                        exit (100);
+                    }
+                    poleCisel.push_back(cisloI);
+                } catch (invalid_argument&){
+                    cerr << "Invalid input" << endl;
+                    exit (100);
+                }   
             }
-
             pocetCiselNaRadku ++;
         }
 
@@ -260,7 +282,9 @@ int main(){
     
     vector <konfigurace> poleKonfiguraci = loadConfig();
 
-    parametry infoProTabulku = loadNums();
+    parametry infoProTabulku = loadNums(poleKonfiguraci);
+
+    checkErrors();
 
     printOutput(poleKonfiguraci, infoProTabulku);
 
