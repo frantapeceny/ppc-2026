@@ -21,11 +21,6 @@ struct parametry{
     int maxDelka;
 };
 
-void checkErrors(){
-    
-
-}
-
 void deliciRada(int sirka, int pocetSloupcu){
     for (int i = 0; i <= pocetSloupcu; i++){
         cout << "+";
@@ -57,7 +52,7 @@ void prvniRadek(int sirka, int pocetSloupcu, string zarovnani){
     cout << "|" << endl;
 }
 
-void printTable(int sirka, int pocetSloupcu, string zarovnani, vector <int> pocetCisel, vector <int> poleCisel){
+void printTable(int sirka, int pocetSloupcu, string zarovnani, vector <int> pocetCisel, vector <int> poleCisel, int vyhashtagovat){
 
     // z = kolikaty je to radek, i = kolikaty sloupec
     deliciRada (sirka, pocetSloupcu);
@@ -78,8 +73,11 @@ void printTable(int sirka, int pocetSloupcu, string zarovnani, vector <int> poce
                 if (i == 0){
                     cout << left << setw(sirka) << z+1;
                 } else if (i <= pocetCisel[z] && i > 0){
-                    cout << left << setw(sirka) << poleCisel[rowOffset + (i - 1)];
-                    idx ++;
+                    if (vyhashtagovat == 1 && poleCisel[rowOffset + (i - 1)] > sirka){
+                        cout << left << setw(sirka) << "#";
+                    } else {
+                        cout << left << setw(sirka) << poleCisel[rowOffset + (i - 1)];
+                    }
                 } else {
                     cout << left << setw(sirka+1);
                 }
@@ -87,8 +85,11 @@ void printTable(int sirka, int pocetSloupcu, string zarovnani, vector <int> poce
                 if (i == 0){
                     cout << right << setw(sirka) << z+1;
                 } else if (i <= pocetCisel[z] && i > 0){
-                    cout << right << setw(sirka) << poleCisel[rowOffset + (i - 1)];
-                    idx ++;
+                    if (vyhashtagovat == 1 && poleCisel[rowOffset + (i - 1)] > sirka){
+                        cout << right << setw(sirka) << "#";
+                    } else {
+                        cout << right << setw(sirka) << poleCisel[rowOffset + (i - 1)];
+                    }
                 } else {
                     cout << right << setw(sirka+1);
                 }
@@ -116,22 +117,42 @@ void printConfig(vector <konfigurace> poleKonfiguraci){
 }
 
 void printOutput(vector <konfigurace> poleKonfiguraci, parametry infoProTabulku){
-    int sirka;
+    int sirka = 0;
     string zarovnani;
+    // vyhasthagovat = 0 znamena ze se chovam normalne - tj. pro dlouha cisla hazim error cell is too short
+    int vyhashtagovat = 0;
 
-    printConfig(poleKonfiguraci);
-
-    for (int i = 0; i < poleKonfiguraci.size(); i ++){
-        if (poleKonfiguraci[i].funkce == "width"){
-            sirka = stoi(poleKonfiguraci[i].hodnota);
+    if (poleKonfiguraci[4].funkce == "stretch"){
+        if (stoi(poleKonfiguraci[4].hodnota) == 1){
+            for (int h = 0; h < infoProTabulku.poleCisel.size(); h++){
+                if (to_string(infoProTabulku.poleCisel[h]).size() > sirka){
+                    sirka = to_string(infoProTabulku.poleCisel[h]).size();
+                }
+            }
+        } else {
+            sirka = stoi(poleKonfiguraci[2].hodnota);
+            vyhashtagovat = 1;
         }
-        if (poleKonfiguraci[i].funkce == "align"){
-            zarovnani = poleKonfiguraci[i].hodnota;
+    } else {
+        sirka = stoi(poleKonfiguraci[2].hodnota);
+        vyhashtagovat = 0;
+    }
+
+    zarovnani = poleKonfiguraci[3].hodnota;
+
+    // check error
+    for (int i = 0; i < infoProTabulku.poleCisel.size(); i++){
+        if (to_string(infoProTabulku.poleCisel[i]).size() > stoi(poleKonfiguraci[2].hodnota) && vyhashtagovat == 0){
+        cerr << "Cell is too short" << endl;
+        exit (103);
         }
     }
+    
+    printConfig(poleKonfiguraci);
+    
     int pocetSloupcu = infoProTabulku.maxDelka;
 
-    printTable(sirka, pocetSloupcu, zarovnani, infoProTabulku.pocetCisel, infoProTabulku.poleCisel);
+    printTable(sirka, pocetSloupcu, zarovnani, infoProTabulku.pocetCisel, infoProTabulku.poleCisel, vyhashtagovat);
 }
 
 void doplnChybejiciConfig(vector <konfigurace>* poleKonfiguraci){
@@ -143,14 +164,11 @@ void doplnChybejiciConfig(vector <konfigurace>* poleKonfiguraci){
 
     vector <string> chci = {"min", "max", "width", "align"};
 
-    vector <string> found;
-    vector <string> missing;
-
     for (const string& target : chci) {
         if (find(mam.begin(), mam.end(), target) != mam.end()){
-            found.push_back(target);
+            // did find it in the configuration
         } else {
-            missing.push_back(target);
+            // didnt find it in the configuration - needs to be filled
             if (target == "max"){
                 konfigurace currentConfig;
                 currentConfig.funkce = target;
@@ -202,6 +220,23 @@ vector <konfigurace> loadConfig(){
 
     doplnChybejiciConfig(&poleKonfiguraci);
 
+    //seradit konfiguraci pro snazsi uzivani in the future
+    vector <string> poradi = {"min", "max", "width", "align", "stretch", "header"};
+
+    sort((poleKonfiguraci).begin(), (poleKonfiguraci).end(),
+    [&poradi](const konfigurace& a, const konfigurace& b) {
+        auto posA = find(poradi.begin(), poradi.end(), a.funkce);
+        auto posB = find(poradi.begin(), poradi.end(), b.funkce);
+        return posA < posB;
+    });
+    
+    // check error
+    //cout << "min: " << poleKonfiguraci[0].hodnota <<", max: "<<poleKonfiguraci[1].hodnota << ", width: "<<poleKonfiguraci[2].hodnota << ", align: " << poleKonfiguraci[3].hodnota << endl;
+    if (poleKonfiguraci[0].hodnota > poleKonfiguraci[1].hodnota || stoi(poleKonfiguraci[2].hodnota) < 1 || (poleKonfiguraci[3].hodnota != "left" && poleKonfiguraci[3].hodnota != "right")){
+        cerr << "Invalid configuration" << endl;
+        exit (102);
+    }
+
     return poleKonfiguraci;
 }
 
@@ -237,6 +272,7 @@ parametry loadNums(vector <konfigurace> poleKonfiguraci){
                 for (int i = prvniNum; i <= druhyNum; i++){                
                     sum = sum + poleCisel[i];
                 }
+
                 poleCisel.push_back(sum);
             } else {
                 // check error
@@ -263,7 +299,6 @@ parametry loadNums(vector <konfigurace> poleKonfiguraci){
         }
         pocetCiselNaRadku = 0;
     }
-
     int pocetRadku = pocetCisel.size();   
 
     parametry returnValues;
@@ -283,8 +318,6 @@ int main(){
     vector <konfigurace> poleKonfiguraci = loadConfig();
 
     parametry infoProTabulku = loadNums(poleKonfiguraci);
-
-    checkErrors();
 
     printOutput(poleKonfiguraci, infoProTabulku);
 
