@@ -6,6 +6,7 @@
 #include <algorithm>
 #include <iomanip>
 #include <stdexcept>
+#include <set>
 
 using namespace std;
 
@@ -21,8 +22,8 @@ struct parametry{
     int maxDelka;
 };
 
-void deliciRada(int sirka, int pocetSloupcu){
-    for (int i = 0; i <= pocetSloupcu; i++){
+void deliciRada(int sirka, int pocetSloupcu, int zahlavi){
+    for (int i = zahlavi; i <= pocetSloupcu; i++){
         cout << "+";
         for (int h = 0; h < (sirka+2); h++){
             cout << "-";
@@ -31,7 +32,8 @@ void deliciRada(int sirka, int pocetSloupcu){
     cout << "+" << endl;
 }
 
-void prvniRadek(int sirka, int pocetSloupcu, string zarovnani){
+void prvniRadek(int sirka, int pocetSloupcu, string zarovnani, int zahlavi){
+    deliciRada (sirka, pocetSloupcu, zahlavi);
     for (int i = 0; i <= pocetSloupcu; i++){
         cout << "| ";
         if (zarovnani == "left"){
@@ -52,45 +54,64 @@ void prvniRadek(int sirka, int pocetSloupcu, string zarovnani){
     cout << "|" << endl;
 }
 
-void printTable(int sirka, int pocetSloupcu, string zarovnani, vector <int> pocetCisel, vector <int> poleCisel, int vyhashtagovat){
+void printTable(int sirka, int pocetSloupcu, string zarovnani, vector <int> pocetCisel, vector <int> poleCisel, int vyhashtagovat, vector <konfigurace> poleKonfiguraci){
 
     // z = kolikaty je to radek, i = kolikaty sloupec
-    deliciRada (sirka, pocetSloupcu);
-    prvniRadek(sirka, pocetSloupcu, zarovnani);
+
+    // zahlavi = 0 znamena vytiskni zahlavi
+    int zahlavi = 0;
+
+    if (poleKonfiguraci[4].funkce == "header"){
+        if (stoi(poleKonfiguraci[4].hodnota) == 0){
+            zahlavi = 1;
+        }
+    } else if (poleKonfiguraci[5].funkce == "header"){
+        if (stoi(poleKonfiguraci[5].hodnota) == 0){
+            zahlavi = 1;
+        }
+    }
+
+    if (zahlavi == 0){
+        prvniRadek(sirka, pocetSloupcu, zarovnani, zahlavi);
+    }
+    
     int pocetRadku = pocetCisel.size();
 
     for (int z = 0; z < pocetRadku; z++){
-        deliciRada (sirka, pocetSloupcu);
-        int idx = 0;
+        deliciRada (sirka, pocetSloupcu, zahlavi);
 
-        //?
         int rowOffset = 0;
         for (int r = 0; r < z; r++) rowOffset += pocetCisel[r];
 
-        for (int i = 0; i <= pocetSloupcu; i++){
+        for (int i = zahlavi; i <= pocetSloupcu; i++){
             cout << "| ";
             if (zarovnani == "left"){
                 if (i == 0){
-                    cout << left << setw(sirka) << z+1;
+                    cout << left << setw(sirka) << z + 1;
                 } else if (i <= pocetCisel[z] && i > 0){
-                    if (vyhashtagovat == 1 && poleCisel[rowOffset + (i - 1)] > sirka){
-                        cout << left << setw(sirka) << "#";
+                    if (vyhashtagovat == 1 && to_string(poleCisel[rowOffset + (i - 1)]).size() > sirka){
+                        for (int g = 0; g < sirka; g++){
+                            cout << "#";
+                        }
                     } else {
                         cout << left << setw(sirka) << poleCisel[rowOffset + (i - 1)];
                     }
-                } else {
+                } else if (zahlavi == 0){
                     cout << left << setw(sirka+1);
                 }
             } else {
                 if (i == 0){
                     cout << right << setw(sirka) << z+1;
                 } else if (i <= pocetCisel[z] && i > 0){
-                    if (vyhashtagovat == 1 && poleCisel[rowOffset + (i - 1)] > sirka){
-                        cout << right << setw(sirka) << "#";
+                    if (vyhashtagovat == 1 && to_string(poleCisel[rowOffset + (i - 1)]).size() > sirka){
+                        cout << right << setw(sirka);
+                        for (int g = 0; g < sirka; g++){
+                            cout << "#";
+                        }
                     } else {
                         cout << right << setw(sirka) << poleCisel[rowOffset + (i - 1)];
                     }
-                } else {
+                } else if (zahlavi == 0){
                     cout << right << setw(sirka+1);
                 }
             }
@@ -99,7 +120,7 @@ void printTable(int sirka, int pocetSloupcu, string zarovnani, vector <int> poce
         cout << "|" << endl;
         
     }
-    deliciRada (sirka, pocetSloupcu);
+    deliciRada (sirka, pocetSloupcu, zahlavi);
 }
 
 void printConfig(vector <konfigurace> poleKonfiguraci){
@@ -127,6 +148,7 @@ void printOutput(vector <konfigurace> poleKonfiguraci, parametry infoProTabulku)
             for (int h = 0; h < infoProTabulku.poleCisel.size(); h++){
                 if (to_string(infoProTabulku.poleCisel[h]).size() > sirka){
                     sirka = to_string(infoProTabulku.poleCisel[h]).size();
+                    vyhashtagovat = 1;
                 }
             }
         } else {
@@ -138,13 +160,15 @@ void printOutput(vector <konfigurace> poleKonfiguraci, parametry infoProTabulku)
         vyhashtagovat = 0;
     }
 
+    poleKonfiguraci[2].hodnota = to_string(sirka);
+
     zarovnani = poleKonfiguraci[3].hodnota;
 
     // check error
     for (int i = 0; i < infoProTabulku.poleCisel.size(); i++){
         if (to_string(infoProTabulku.poleCisel[i]).size() > stoi(poleKonfiguraci[2].hodnota) && vyhashtagovat == 0){
-        cerr << "Cell is too short" << endl;
-        exit (103);
+            cerr << "Cell is too short" << endl;
+            exit (103);
         }
     }
     
@@ -152,7 +176,7 @@ void printOutput(vector <konfigurace> poleKonfiguraci, parametry infoProTabulku)
     
     int pocetSloupcu = infoProTabulku.maxDelka;
 
-    printTable(sirka, pocetSloupcu, zarovnani, infoProTabulku.pocetCisel, infoProTabulku.poleCisel, vyhashtagovat);
+    printTable(sirka, pocetSloupcu, zarovnani, infoProTabulku.pocetCisel, infoProTabulku.poleCisel, vyhashtagovat, poleKonfiguraci);
 }
 
 void doplnChybejiciConfig(vector <konfigurace>* poleKonfiguraci){
@@ -252,6 +276,9 @@ parametry loadNums(vector <konfigurace> poleKonfiguraci){
         getline(cin, radek, '\n');   
         stringstream radekSS(radek);
 
+        int rowOffset = 0;
+        for (int r = 0; r < pocetCisel.size(); r++) rowOffset += pocetCisel[r];
+    
         while(radekSS.peek() != EOF){
             getline(radekSS, cislo, ';');
 
@@ -269,8 +296,10 @@ parametry loadNums(vector <konfigurace> poleKonfiguraci){
                 int prvniNum = zacatekIntervalu - 'A';
                 int druhyNum = konecIntervalu - 'A';
 
-                for (int i = prvniNum; i <= druhyNum; i++){                
-                    sum = sum + poleCisel[i];
+
+
+                for (int i = prvniNum; i <= druhyNum; i++){
+                    sum = sum + poleCisel[i + rowOffset];
                 }
 
                 poleCisel.push_back(sum);
@@ -290,6 +319,7 @@ parametry loadNums(vector <konfigurace> poleKonfiguraci){
                 }   
             }
             pocetCiselNaRadku ++;
+            sum = 0;
         }
 
         pocetCisel.push_back(pocetCiselNaRadku);
@@ -299,6 +329,7 @@ parametry loadNums(vector <konfigurace> poleKonfiguraci){
         }
         pocetCiselNaRadku = 0;
     }
+
     int pocetRadku = pocetCisel.size();   
 
     parametry returnValues;
