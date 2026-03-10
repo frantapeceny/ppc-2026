@@ -89,7 +89,8 @@ void printTable(int sirka, int pocetSloupcu, string zarovnani, vector <int> poce
                 if (i == 0){
                     cout << left << setw(sirka) << z + 1;
                 } else if (i <= pocetCisel[z] && i > 0){
-                    if (vyhashtagovat == 1 && to_string(poleCisel[rowOffset + (i - 1)]).size() > sirka){
+                    int something = to_string(poleCisel[rowOffset + (i - 1)]).size();
+                    if (vyhashtagovat == 1 && something > sirka){
                         for (int g = 0; g < sirka; g++){
                             cout << "#";
                         }
@@ -103,7 +104,8 @@ void printTable(int sirka, int pocetSloupcu, string zarovnani, vector <int> poce
                 if (i == 0){
                     cout << right << setw(sirka) << z+1;
                 } else if (i <= pocetCisel[z] && i > 0){
-                    if (vyhashtagovat == 1 && to_string(poleCisel[rowOffset + (i - 1)]).size() > sirka){
+                    int something = to_string(poleCisel[rowOffset + (i - 1)]).size();
+                    if (vyhashtagovat == 1 && something > sirka){
                         cout << right << setw(sirka);
                         for (int g = 0; g < sirka; g++){
                             cout << "#";
@@ -127,7 +129,8 @@ void printConfig(vector <konfigurace> poleKonfiguraci){
     vector <string> poradiTisku = {"min", "max", "width", "align", "stretch", "header"};
     
     for (auto target : poradiTisku){
-        for (int i = 0; i < poleKonfiguraci.size(); i++) {
+        int something = poleKonfiguraci.size();
+        for (int i = 0; i < something; i++) {
             if (poleKonfiguraci[i].funkce == target) {
                 cout << "config." << poleKonfiguraci[i].funkce << "=" << poleKonfiguraci[i].hodnota << endl;
                 break;
@@ -145,9 +148,11 @@ void printOutput(vector <konfigurace> poleKonfiguraci, parametry infoProTabulku)
 
     if (poleKonfiguraci[4].funkce == "stretch"){
         if (stoi(poleKonfiguraci[4].hodnota) == 1){
-            for (int h = 0; h < infoProTabulku.poleCisel.size(); h++){
-                if (to_string(infoProTabulku.poleCisel[h]).size() > sirka){
-                    sirka = to_string(infoProTabulku.poleCisel[h]).size();
+            int something = infoProTabulku.poleCisel.size();
+            for (int h = 0; h < something; h++){
+                int somethingConcrete = to_string(infoProTabulku.poleCisel[h]).size();
+                if (somethingConcrete > sirka){
+                    sirka = somethingConcrete;
                     vyhashtagovat = 1;
                 }
             }
@@ -165,8 +170,10 @@ void printOutput(vector <konfigurace> poleKonfiguraci, parametry infoProTabulku)
     zarovnani = poleKonfiguraci[3].hodnota;
 
     // check error
-    for (int i = 0; i < infoProTabulku.poleCisel.size(); i++){
-        if (to_string(infoProTabulku.poleCisel[i]).size() > stoi(poleKonfiguraci[2].hodnota) && vyhashtagovat == 0){
+    int something = infoProTabulku.poleCisel.size();
+    for (int i = 0; i < something; i++){
+        int somethingConcrete = to_string(infoProTabulku.poleCisel[i]).size();
+        if (somethingConcrete > stoi(poleKonfiguraci[2].hodnota) && vyhashtagovat == 0){
             cerr << "Cell is too short" << endl;
             exit (103);
         }
@@ -182,7 +189,8 @@ void printOutput(vector <konfigurace> poleKonfiguraci, parametry infoProTabulku)
 void doplnChybejiciConfig(vector <konfigurace>* poleKonfiguraci){
     
     vector <string> mam;
-    for (int i = 0; i < (*poleKonfiguraci).size(); i ++){
+    int something = (*poleKonfiguraci).size();
+    for (int i = 0; i < something; i ++){
         mam.push_back((*poleKonfiguraci)[i].funkce);
     }
 
@@ -239,8 +247,11 @@ vector <konfigurace> loadConfig(){
         poleKonfiguraci.push_back(currentConfig);
 
     }
-    cin.ignore(); // preskocim "="
-    cin.ignore(); // preskocim newline
+    while (cin.peek() == '=' || cin.peek() == ' ' || cin.peek() == '\n'){
+        cin.ignore();
+    }
+    //cin.ignore(); // preskocim "="
+    //cin.ignore(); // preskocim newline
 
     doplnChybejiciConfig(&poleKonfiguraci);
 
@@ -256,7 +267,7 @@ vector <konfigurace> loadConfig(){
     
     // check error
     //cout << "min: " << poleKonfiguraci[0].hodnota <<", max: "<<poleKonfiguraci[1].hodnota << ", width: "<<poleKonfiguraci[2].hodnota << ", align: " << poleKonfiguraci[3].hodnota << endl;
-    if (poleKonfiguraci[0].hodnota > poleKonfiguraci[1].hodnota || stoi(poleKonfiguraci[2].hodnota) < 1 || (poleKonfiguraci[3].hodnota != "left" && poleKonfiguraci[3].hodnota != "right")){
+    if (stoi(poleKonfiguraci[0].hodnota) > stoi(poleKonfiguraci[1].hodnota) || stoi(poleKonfiguraci[2].hodnota) < 1 || (poleKonfiguraci[3].hodnota != "left" && poleKonfiguraci[3].hodnota != "right")){
         cerr << "Invalid configuration" << endl;
         exit (102);
     }
@@ -277,7 +288,8 @@ parametry loadNums(vector <konfigurace> poleKonfiguraci){
         stringstream radekSS(radek);
 
         int rowOffset = 0;
-        for (int r = 0; r < pocetCisel.size(); r++) rowOffset += pocetCisel[r];
+        int something = pocetCisel.size();
+        for (int r = 0; r < something; r++) rowOffset += pocetCisel[r];
     
         while(radekSS.peek() != EOF){
             getline(radekSS, cislo, ';');
@@ -315,7 +327,7 @@ parametry loadNums(vector <konfigurace> poleKonfiguraci){
                     poleCisel.push_back(cisloI);
                 } catch (invalid_argument&){
                     cerr << "Invalid input" << endl;
-                    exit (100);
+                    exit (101);
                 }   
             }
             pocetCiselNaRadku ++;
