@@ -16,8 +16,7 @@ void print_hline(int l = 80)
 void print_timetable(const Network &net, const string &stop)
 {
     /*search all lines for the name of stop*/
-    for (int ln = 0; ln < net.nlines(); ln++)
-    {
+    for (int ln = 0; ln < net.nlines(); ln++){
         Line tmpL = net.getLine(ln);  // Get one line to work with as a local variable
         
         /* Find if a station in variable "stop" is present in the line "tmpL" */
@@ -25,6 +24,17 @@ void print_timetable(const Network &net, const string &stop)
         // hint 1: cycle through all the stops in tmpL.stops and break when the name is found
         // hint 2: if stop is not found, try in the next line (call continue; on the enclosing for cycle)
         // hint 3: if stop is found, print its timetable (the function continues without interuption)
+        
+
+        //prvni doplneni kodu
+        for (itS = tmpL.stops.begin(); itS != tmpL.stops.end(); itS++) {
+          if (*itS == stop) break;
+        }
+
+        if (itS == tmpL.stops.end()) continue;
+        
+
+
         
         /* ***insert your code here*** */
     
@@ -150,8 +160,4 @@ void print_line_stations(const Network &net, int ln)
     cout << setw(39) << setfill('-') << std::left << "+---+----+" << "+";
     cout << setw(39) << setfill('-') << std::left << "+---+----+" << "+\n";
 }
-
-
-
-
 

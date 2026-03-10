@@ -49,6 +49,8 @@ int main(int argc, char** argv) {
         }
         // end of input check
 
+        
+
         /* here should start the code for printing timetables*/
         /* stop_in contains names of stops, for which the timetable is to be printed. */
 
