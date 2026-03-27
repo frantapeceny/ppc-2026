@@ -120,7 +120,6 @@ int Network::nlines() const
 
 void Network::loadFromFile(string filename)
 {
-
     Line tmpL;
     Depart tmpD;
     PlanConn tmpC;
