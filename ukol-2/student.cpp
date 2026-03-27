@@ -1,7 +1,8 @@
 #include "student.hpp"
 
-using namespace std;
+#include <cmath>
 
+using namespace std;
 
 /*helper for printing lines +---+ (argument = 5)*/
 void print_hline(int l = 80)
@@ -12,7 +13,7 @@ void print_hline(int l = 80)
     cout << "+\n";
 }
 
-/*print timetable for a stop of given name */
+/*print timetable for a stop of a given name */
 void print_timetable(const Network &net, const string &stop)
 {
     /*search all lines for the name of stop*/
@@ -20,24 +21,18 @@ void print_timetable(const Network &net, const string &stop)
         Line tmpL = net.getLine(ln);  // Get one line to work with as a local variable
         
         /* Find if a station in variable "stop" is present in the line "tmpL" */
-        auto itS = tmpL.stops.begin();
+        // auto itS = tmpL.stops.begin();
         // hint 1: cycle through all the stops in tmpL.stops and break when the name is found
         // hint 2: if stop is not found, try in the next line (call continue; on the enclosing for cycle)
         // hint 3: if stop is found, print its timetable (the function continues without interuption)
         
+        auto itS = std::find(tmpL.stops.begin(), tmpL.stops.end(), stop);
 
-        //prvni doplneni kodu
-        for (itS = tmpL.stops.begin(); itS != tmpL.stops.end(); itS++) {
-          if (*itS == stop) break;
+        if (itS == tmpL.stops.end()){
+          continue;
         }
 
-        if (itS == tmpL.stops.end()) continue;
-        
-
-
-        
         /* ***insert your code here*** */
-    
         /* at this point, iterator "itS" should point at the station that was found */
         
         /* Printing header lines */
@@ -50,13 +45,13 @@ void print_timetable(const Network &net, const string &stop)
              << "\n";
         /* end of header*/
         
-        
-        int offset = /*insert code for obtaining index of itS within the tmpL.stops vector*/;
-        
+        int offset = itS - tmpL.stops.begin(); /*insert code for obtaining index of itS within the tmpL.stops vector*/;
+        int posledniZastavka = tmpL.stops.size() - 1;
+
         /* print timetable head for forward direction (left half) */
-        cout << "| To: " << setw(40 - 8) << setfill(' ') << std::left << /*name of the last stop*/ << " |";
+        cout << "| To: " << setw(40 - 8) << setfill(' ') << std::left << tmpL.stops[posledniZastavka] << " |";
         /* print timetable head for backward direction (right half) */
-        cout << "| To: " << setw(40 - 8) << setfill(' ') << std::left << /*name of the first stop*/  << " |\n";
+        cout << "| To: " << setw(40 - 8) << setfill(' ') << std::left << tmpL.stops[0] << " |\n";
 
         cout << setw(39) << setfill('-') << std::left << "+----+"
              << "+";
@@ -68,7 +63,17 @@ void print_timetable(const Network &net, const string &stop)
         vector<Depart> tmpDvB; // backward departures from station "stop"
         /* fill the vectors tmpDvF and tmpDvB, extract the departures from tmpL.conns_fwd and tmpL.conns_bwd*/
         
-        /* ***insert your code here*** */
+        for (auto &conn : tmpL.conns_fwd) {
+          if (offset < (int)conn.size()) {
+               tmpDvF.push_back(conn[offset]);
+          }
+        }
+
+        for (auto &conn : tmpL.conns_bwd) {
+          if (offset < (int)conn.size()) {
+               tmpDvB.push_back(conn[offset]);
+          }
+        }
 
         auto itDvF = tmpDvF.begin();
         auto itDvB = tmpDvB.begin();
@@ -84,13 +89,23 @@ void print_timetable(const Network &net, const string &stop)
             // hint 2: Objects of class Depart have a member Time ti. Use function "void Time::gett(int &hh, int &mm, int &ss)" to obtain hours, minutes, seconds 
             // hint 3: Use this snippet for formatting: osf << setw(2) << std::right << setfill('0') << mm << " ";
 
-            /* ***insert your code here*** */
+            while (itDvF != tmpDvF.end()) {
+               itDvF->ti.gett(hh, mm, ss);
+               if (hh != hour) break;
+               osf << setw(2) << std::right << setfill('0') << mm << " ";
+               itDvF++;
+            }
 
             /* Fill osb with minutes of bwd departure times in the current hour */
             // hint 1: Use the "itDvB" iterator, the vector of departures is sorted
             // hint 2: The problem is very similar to the forward deprtures. 
             
-            /* ***insert your code here*** */
+            while (itDvB != tmpDvB.end()) {
+               itDvB->ti.gett(hh, mm, ss);
+               if (hh != hour) break;
+               osb << setw(2) << std::right << setfill('0') << mm << " ";
+               itDvB++;
+            }
 
             /* print osf and osb formatted as necessary*/
             cout << "| " << setw(2) << std::right << setfill('0') << hour << " | ";
@@ -106,13 +121,15 @@ void print_timetable(const Network &net, const string &stop)
     }
 }
 
+
+
 void print_line_stations(const Network &net, int ln)
 {
     Line tmpL = net.getLine(ln);
 
     /* Printing header lines */
     print_hline();
-    cout << "| Line: " << /* insert line number here */ << setw(71) << setfill(' ') << std::right << " |"
+    cout << "| Line: " << ln << setw(71) << setfill(' ') << std::right << " |"
          << "\n";
 
     cout << setw(39) << setfill('-') << std::left << "+---+----+"
@@ -130,30 +147,42 @@ void print_line_stations(const Network &net, int ln)
 
     /* your code modifications of this function should appear below this line */
 
-    /* hint 1: use e.g. following itertors: */
-    auto itSf = /* iterator pointing on the first station name of the line */
-    auto itDf = /* iterator pointing on the first forward connection of the day */
-    auto itSb = /* reverse iterator pointing on the last station name of the line */
-    auto itDb = /* iterator pointing on the first backward connection of the day */
+    /* hint 1: use e.g. following iterators: */
+    auto itSf = 0; /* iterator pointing on the first station name of the line */
+    auto itDf = 0; /* iterator pointing on the first forward connection of the day */
+    int pocetZastavek = tmpL.stops.size();
+    auto itSb = pocetZastavek - 1; /* reverse iterator pointing on the last station name of the line */
+    auto itDb = 0; /* iterator pointing on the first backward connection of the day */
     
     /* hint 2: use a single loop to iterate through the station forwards and backwards */
     /*some kind of loop ( )*/
-    {
 
+    for (int i = 0; i < pocetZastavek; i++)
+    {
         /*hint 3: use the following snippets for correct formatting*/
         /* forward direction (left half of the output) */
-        cout << "| " << setw(1)  << setfill('0') << std::right << /* integer minutes from previous stop*/ 
-            << " | " << setw(2)  << setfill('0') << std::right << /* integer minutes from first fwd stop*/
-            << " | " << setw(27) << setfill(' ') << std::left << /* name of the current forward stop*/
+        int minutesFdiff = (i == 0) ? 0 : floor(abs((tmpL.conns_fwd[0][itDf].ti.gets() - tmpL.conns_fwd[0][itDf-1].ti.gets())/60));
+        int minutesF = (i == 0) ? 0 : floor(abs((tmpL.conns_fwd[0][itDf].ti.gets() - tmpL.conns_fwd[0][0].ti.gets())/60));
+
+        cout << "| " << setw(1)  << setfill('0') << std::right << minutesFdiff /* integer minutes from previous stop*/ 
+            << " | " << setw(2)  << setfill('0') << std::right << minutesF /* integer minutes from first fwd stop*/
+            << " | " << setw(27) << setfill(' ') << std::left << tmpL.stops[itSf] /* name of the current forward stop*/
             << " |";
 
         /* backward direction (right half of the output) */
-        cout << "| " << setw(1)  << setfill('0') << std::right << /* integer minutes from previous stop*/ 
-            << " | " << setw(2)  << setfill('0') << std::right << /* integer minutes from first bwd stop*/
-            << " | " << setw(27) << setfill(' ') << std::left << /* name of the current backward stop*/
+
+        int minutesBdiff = (i == 0) ? 0 : floor(abs((tmpL.conns_bwd[0][pocetZastavek-itDb].ti.gets() - tmpL.conns_bwd[0][pocetZastavek-itDb-1].ti.gets())/60));
+        int minutesB = (i == 0) ? 0 : floor(abs((tmpL.conns_fwd[0][pocetZastavek-itDb-1].ti.gets() - tmpL.conns_fwd[0][pocetZastavek-1].ti.gets())/60));
+
+        cout << "| " << setw(1)  << setfill('0') << std::right << minutesBdiff /* integer minutes from previous stop*/ 
+            << " | " << setw(2)  << setfill('0') << std::right << minutesB /* integer minutes from first bwd stop*/
+            << " | " << setw(27) << setfill(' ') << std::left << tmpL.stops[itSb] /* name of the current backward stop*/
             << " |\n";
 
-        /* hint 4: do not forget to increment the iterators*/
+        itSf++;
+        itDf++;
+        itSb--;
+        itDb++;
     }
 
     /*print footer; no modifications necessary below this line*/
