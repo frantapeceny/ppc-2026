@@ -1,19 +1,25 @@
 
 #include <iostream>
 #include <string>
+#include <set>
 
 using namespace std;
-
 
 class Journal{
     private:
         string name;
         string volume;
-        int issue;
-        int year;    
-        int id;    
+        string issue;
+        string year;    
+        int id;
 
     public:
+    Journal(string name, string volume, string issue, string year)
+        : name(name), volume(volume), issue(issue), year(year) {}
+
+    bool operator<(const Journal &a) const {
+        return id < a.id;
+    }
 
 };
 
@@ -21,17 +27,53 @@ class Book{
     private: 
         string name;
         string author;
-        int year;
+        string year;
         int id;
 
     public:
+    Book(string name, string author, string year)
+        : name(name), author(author), year(year) {}
 
+    bool operator<(const Book &a) const {
+        return id < a.id;
+    }
+};
+
+class databaze{
+    private:
+        set <Journal> journals;
+        set <Book> books;
+        
+    public:
+    int count = 0;
+
+    void add(Journal j){
+        journals.insert(j);
+        count++;
+    }
+    
+    void add(Book b){
+        books.insert(b);
+        count++;
+    }
 };
 
 int main(){
 
+    string command;
+    while(true){
+        getline(cin, command);
 
+        databaze db;
+        db.add(Journal("IEEE Transaction on Computers", "C-35", "10", "Oct. 1986"));
+        db.add(Journal("IEEE Transaction on Computers", "C-35", "11", "Dec. 1986"));
+        db.add(Journal("IEEE Transactions on Communications", "28", "8", "Aug. 1980"));
+        db.add(Book("Dva roky prazdnin", "Jules Verne", "1888"));
+        db.add(Book("Tajuplny ostrov", "Jules Verne", "1874"));
+        db.add(Book("Ocelove mesto", "Jules Verne", "1879"));
 
+        cout << "pocet vlozenych knih: " << db.count << endl;
 
+    }
     return 0;
 }
