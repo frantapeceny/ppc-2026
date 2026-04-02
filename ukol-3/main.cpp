@@ -1,70 +1,79 @@
 
 #include <iostream>
+#include <iomanip>
 #include <string>
 #include <set>
 
 using namespace std;
 
-class Journal{
-    private:
+void printBox(string text) {
+    cout << "+" << setw(58) << setfill('-') << "" << "+" << endl;
+    cout << "| " << setw (56) << setfill(' ') << left << text << " |" << endl;
+    cout << "+" << setw(58) << setfill('-') << "" << "+" << endl;
+}
+
+class Publication{
+    protected:
         string name;
-        string volume;
-        string issue;
-        string year;    
-        int id;
+        string year;
+        string author;
+        int id = 0;
+    public: 
+        int getId() const { return id; }
+        void setId(int i) { id = i; }
+        string getName() const { return name; }
+        string getYear() const { return year; }
+        string getAuthor() const { return author; }
 
-    public:
-    Journal(string name, string volume, string issue, string year)
-        : name(name), volume(volume), issue(issue), year(year) {}
-
-    bool operator<(const Journal &a) const {
-        return id < a.id;
-    }
-
+        bool operator<(const Publication &p) const {
+            return id < p.id;
+        }
 };
 
-class Book{
-    private: 
-        string name;
-        string author;
-        string year;
-        int id;
+class Journal : public Publication{
+    private:
+        string issue;
 
     public:
-    Book(string name, string author, string year)
-        : name(name), author(author), year(year) {}
+        Journal(string name, string volume, string issue, string year)
+            : issue(issue) { this->name = name; this->year = year; this->author = volume; }
+};
 
-    bool operator<(const Book &a) const {
-        return id < a.id;
-    }
+class Book : public Publication{
+    private:
+    public:
+    Book(string name, string author, string year) { this->name = name; this->year = year; this->author = author; }
+
 };
 
 class Database{
     private:
-        set <Journal> journals;
-        set <Book> books;
-        
+        set <Publication> publikace;
+
     public:
     int count = 0;
 
-    void add(Journal j){
-        journals.insert(j);
-        count++;
-    }
-    
-    void add(Book b){
-        books.insert(b);
+    void add(Publication p){
+        p.setId(count);
+        publikace.insert(p);
         count++;
     }
 
     void list() const {
-        if ()
-        for (const auto &tiskovina : )
+        cout << "+" << setw(58) << setfill('-') << "" << "+" << endl;
+        cout << "| " << setw(56) << setfill(' ') << left << "List of all records" << " |" << endl;
+        for (const auto &tiskovina : publikace){
+            cout << "+----+" << setw(53) << setfill('-') << "" << "+" << endl;
+            cout << "| " << setw(2) << setfill(' ') << right << tiskovina.getId()+1 << " | " << setw(51) << left << tiskovina.getName() << " |" << endl;
+            cout << "|    | " << setw(51) << setfill(' ') << left << tiskovina.getYear() + ", "  + tiskovina.getAuthor() << " |" << endl;
+        }
+        cout << "+----+" << setw(53) << setfill('-') << "" << "+" << endl;
+        cout << "| " << setw(56) << setfill(' ') << left << "Total: " + to_string(count) << " |" << endl;
+        cout << "+" << setw(58) << setfill('-') << "" << "+" << endl;
     }
 };
 
 int main(){
-
     Database databaze;
     databaze.add(Journal("IEEE Transaction on Computers", "C-35", "10", "Oct. 1986"));
     databaze.add(Journal("IEEE Transaction on Computers", "C-35", "11", "Dec. 1986"));
@@ -77,10 +86,27 @@ int main(){
     while(true){
         getline(cin, command);
 
-        cout << "pocet vlozenych knih: " << databaze.count << endl;
+        int pozice = command.find("remove");
 
         if (command == "list"){
-           
+            databaze.list();
+        } else if (pozice != string::npos){
+            if (command.find(":") != string::npos){
+                string id = command.substr(pozice+7); // prectu od ":" do konce slova
+
+                if (id == ""){
+                    cerr << "nuh uh, not like this" << endl;
+                    return -1;
+                } else if (databaze.count < stoi(id) || stoi(id) <= 0){
+                    printBox("ID = " + id + " is not in the database");
+                } else {
+                    //database.remove(id);
+                }
+            } else {
+                printBox("Command \"remove\" expects some argument");
+            }
+        } else {
+            printBox("Unknown command \"" + command + "\"");
         }
 
     }
