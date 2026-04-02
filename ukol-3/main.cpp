@@ -245,7 +245,7 @@ int main(){
                 string keyWord;
                 string order;
 
-                int poziceDvojtecky = text.find(":");
+                size_t poziceDvojtecky = text.find(":");
                 if (poziceDvojtecky == string::npos){
                     keyWord = text.substr(0);
                     order = "";
