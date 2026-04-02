@@ -241,12 +241,12 @@ int main(){
             }
         } else if (poziceS != string::npos){
             if (command.find(":") != string::npos ){
-                string text = command.substr(poziceS+5);
+                string text = command.substr(poziceS+5);    
                 string keyWord;
                 string order;
 
                 int poziceDvojtecky = text.find(":");
-                if (poziceDvojtecky == 0){
+                if (poziceDvojtecky == string::npos){
                     keyWord = text.substr(0);
                     order = "";
                 } else {
