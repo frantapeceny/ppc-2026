@@ -39,7 +39,7 @@ class Book{
     }
 };
 
-class databaze{
+class Database{
     private:
         set <Journal> journals;
         set <Book> books;
@@ -56,23 +56,32 @@ class databaze{
         books.insert(b);
         count++;
     }
+
+    void list() const {
+        if ()
+        for (const auto &tiskovina : )
+    }
 };
 
 int main(){
+
+    Database databaze;
+    databaze.add(Journal("IEEE Transaction on Computers", "C-35", "10", "Oct. 1986"));
+    databaze.add(Journal("IEEE Transaction on Computers", "C-35", "11", "Dec. 1986"));
+    databaze.add(Journal("IEEE Transactions on Communications", "28", "8", "Aug. 1980"));
+    databaze.add(Book("Dva roky prazdnin", "Jules Verne", "1888"));
+    databaze.add(Book("Tajuplny ostrov", "Jules Verne", "1874"));
+    databaze.add(Book("Ocelove mesto", "Jules Verne", "1879"));
 
     string command;
     while(true){
         getline(cin, command);
 
-        databaze db;
-        db.add(Journal("IEEE Transaction on Computers", "C-35", "10", "Oct. 1986"));
-        db.add(Journal("IEEE Transaction on Computers", "C-35", "11", "Dec. 1986"));
-        db.add(Journal("IEEE Transactions on Communications", "28", "8", "Aug. 1980"));
-        db.add(Book("Dva roky prazdnin", "Jules Verne", "1888"));
-        db.add(Book("Tajuplny ostrov", "Jules Verne", "1874"));
-        db.add(Book("Ocelove mesto", "Jules Verne", "1879"));
+        cout << "pocet vlozenych knih: " << databaze.count << endl;
 
-        cout << "pocet vlozenych knih: " << db.count << endl;
+        if (command == "list"){
+           
+        }
 
     }
     return 0;
