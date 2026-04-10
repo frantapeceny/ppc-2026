@@ -8,17 +8,17 @@ using namespace std;
 /*** CONSTRUCTORS & DESTRUCTOR ***/
 Matrix::Matrix(int nrow, int ncol)
 {
-
+    vector <value> data (nrow*ncol, 0);
 }
 
 Matrix::Matrix(int rowscols)
 {
-
+    vector <value> data (0, 0);
 }
 
 Matrix::Matrix(const Matrix &m)
 {
-
+        
 }
 
 Matrix::Matrix(const std::vector<value> &v)
